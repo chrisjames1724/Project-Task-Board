@@ -23,14 +23,21 @@ function createTaskCard(task) {
     //Adding class declaring width with the ability to be draggable
     .addClass("card w-75 task-card draggable my-3")
     .attr("data-task-id", task.id);
-  //Adding a "div" and "class" using the text input into the tast title
+  //Adding a "div" and "class" using the text input into the tast title an h4 header
   const cardHeader = $("<div>").addClass("card-header h4").text(task.title);
+  //adding a "div" and "class" to the card body which will contain the tast description, due date & delete button
   const cardBody = $("<div>").addClass("card-body");
+  //adding Paragraph element and class card text for the task description
   const cardDescription = $("<p>").addClass("card-text").text(task.description);
+  //adding Paragraph element and class card text for the due date
   const cardDueDate = $("<p>").addClass("card-text").text(task.dueDate);
+  //declaring the delete button as button
   const cardDeleteBtn = $("<button>")
+  //adding a class to make the delete button red
     .addClass("btn btn-danger delete")
+    //putting the text in the button as delete
     .text("Delete")
+    //
     .attr("data-task-id", task.id);
   //Deleting the task card upon the click of the delete button
   cardDeleteBtn.on("click", handleDeleteTask);
@@ -39,10 +46,13 @@ function createTaskCard(task) {
     const now = dayjs();
     const taskDueDate = dayjs(task.dueDate, "DD/MM/YYYY");
     if (now.isSame(taskDueDate, "day")) {
-      //White text red button
+      //White text yellow background if the task is not done on the same day as task is due
       taskCard.addClass("bg-warning text-white");
+      
     } else if (now.isAfter(taskDueDate)) {
+      //White text red background if the task is not done and the due date has passed
       taskCard.addClass("bg-danger text-white");
+      //mkaing a light border for all the cards to lay within in each section of "to-do" "in-progress" and "done"
       cardDeleteBtn.addClass("border-light");
     }
   }
