@@ -2,7 +2,7 @@
 let taskList = JSON.parse(localStorage.getItem("tasks"));
 let nextId = JSON.parse(localStorage.getItem("nextId"));
 
-//creating the fucntion of generating a task ID card, if there is none then show nothing 
+//creating the counter function of the task cards
 function generateTaskId() {
   //
   if (nextId === null) {
@@ -11,7 +11,7 @@ function generateTaskId() {
     nextId++;
   }
 
-  //This is putting the input info of the task cards into local storage
+  //This is putting the count of the task cards into local storage
   localStorage.setItem("nextId", JSON.stringify(nextId));
   return nextId;
 }
@@ -33,27 +33,28 @@ function createTaskCard(task) {
   const cardDueDate = $("<p>").addClass("card-text").text(task.dueDate);
   //declaring the delete button as button
   const cardDeleteBtn = $("<button>")
-  //adding a class to make the delete button red
+    //adding a class to make the delete button red
     .addClass("btn btn-danger delete")
     //putting the text in the button as delete
     .text("Delete")
-    //
+    //adding an attribute of the delete button to the task.id
     .attr("data-task-id", task.id);
   //Deleting the task card upon the click of the delete button
   cardDeleteBtn.on("click", handleDeleteTask);
 
-  //
+  //if the due date is past and also the status is not done then run this if statement
   if (task.dueDate && task.status !== "done") {
+    //
     const now = dayjs();
+    //task due date through dayjs will br presented in the following (DD/MM/YYY) format
     const taskDueDate = dayjs(task.dueDate, "DD/MM/YYYY");
+    // //White text yellow background if the task is not done on the same day as task is due
     if (now.isSame(taskDueDate, "day")) {
-      //White text yellow background if the task is not done on the same day as task is due
       taskCard.addClass("bg-warning text-white");
-      
-    } else if (now.isAfter(taskDueDate)) {
       //White text red background if the task is not done and the due date has passed
+    } else if (now.isAfter(taskDueDate)) {
       taskCard.addClass("bg-danger text-white");
-      //mkaing a light border for all the cards to lay within in each section of "to-do" "in-progress" and "done"
+      //mkaing a light border of the deletr button when the due date is passed
       cardDeleteBtn.addClass("border-light");
     }
   }
@@ -65,21 +66,20 @@ function createTaskCard(task) {
   return taskCard;
 }
 
+//rendering each task list card on to the task board
 function renderTaskList() {
+  //if there is a task in the local storage then it will initialize the array
   if (!taskList) {
-    //Putting the objects of the task list into an array [todo, inprogress, donelist]
     taskList = [];
   }
-  //Declaring that the "todoList" will be whichever "taskCards" are in the "todoList"
+  //Clears the board of all tasks
   const todoList = $("#todo-cards");
   todoList.empty();
-  //Declaring that the "tinProgressList" will be whichever "taskCards" are in the "inProgressList"
   const inProgressList = $("#in-progress-cards");
   inProgressList.empty();
-  //Declaring that the "doneList" will be whichever "taskCards" are in the "doneList"
   const doneList = $("#done-cards");
   doneList.empty();
-  //this is declaring where to append each of the task cards depending on where each card has been dragged/dropped
+  //this is populating the board with any task from local starage
   for (let task of taskList) {
     if (task.status === "to-do") {
       todoList.append(createTaskCard(task));
@@ -89,11 +89,11 @@ function renderTaskList() {
       doneList.append(createTaskCard(task));
     }
   }
-
+  //using a jquery helper function to create the .7 opacity of the task card being dragged until it is dropped in another list
   $(".draggable").draggable({
     opacity: 0.7,
     zIndex: 100,
-
+    //referencing thr specific card that is being dragged and repopulating that list returning the origional css
     helper: function (e) {
       const original = $(e.target).hasClass("ui-draggable")
         ? $(e.target)
@@ -105,7 +105,7 @@ function renderTaskList() {
   });
 }
 
-//declaring a function on how to what to do once a task is added
+//declaring a function on what to do once a task is added, preventing the default bootstrap settings
 function handleAddTask(event) {
   event.preventDefault();
 
@@ -122,6 +122,7 @@ function handleAddTask(event) {
   taskList.push(task);
   localStorage.setItem("tasks", JSON.stringify(taskList));
   renderTaskList();
+  //clears task dialog so it is clear when you go to add another task card
   $("#taskTitle").val("");
   $("#taskDescription").val("");
   $("#taskDueDate").val("");
@@ -130,10 +131,10 @@ function handleAddTask(event) {
 //this is the function of the delete task event which removes the task data from local storage
 function handleDeleteTask(event) {
   event.preventDefault();
-
+  //gets the id of the task that is being deleted
   const taskId = $(this).attr("data-task-id");
 
-  //putting the tasklist into an arrary in local storage
+  //putting the tasklist into an arrary in local storage after filtering out the task with the matching task id
   taskList = taskList.filter((task) => task.id !== parseInt(taskId));
   localStorage.setItem("tasks", JSON.stringify(taskList));
   renderTaskList();
@@ -155,19 +156,19 @@ function handleDrop(event, ui) {
   renderTaskList();
 }
 
-
+//after the document page loads run this function
 $(document).ready(function () {
   renderTaskList();
 
-  //add take on "AddTask" click
+  //add task on "AddTask" click
   $("#taskForm").on("submit", handleAddTask);
 
-  //
+  //make sure each list can be dragged and dropped into
   $(".lane").droppable({
     accept: ".draggable",
     drop: handleDrop,
   });
-
+  //defining the behaviors of the datepicker
   $("#taskDueDate").datepicker({
     changeMonth: true,
     changeYear: true,
