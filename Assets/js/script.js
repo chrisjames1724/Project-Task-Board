@@ -1,8 +1,8 @@
-//This is declaring global variables of "taskList" & "nextID" which will be stored in local storage which will be pulled at a later time
+//This is declaring global variables of "taskList" & "nextID" which will be stored in local storage to then be pulled at a later time
 let taskList = JSON.parse(localStorage.getItem("tasks"));
 let nextId = JSON.parse(localStorage.getItem("nextId"));
 
-//creating the fucntion of generating a task ID card
+//creating the fucntion of generating a task ID card, if there is none then show nothing 
 function generateTaskId() {
   //
   if (nextId === null) {
@@ -18,7 +18,7 @@ function generateTaskId() {
 
 //This is identifying and creating the task cards which will be able to be moved from the "todo," "inprogress," and "done" task sections
 function createTaskCard(task) {
-  //declaring the constant "taskCard"
+  //declaring the constant "taskCard" as a div
   const taskCard = $("<div>")
     //Adding class declaring width with the ability to be draggable
     .addClass("card w-75 task-card draggable my-3")
@@ -42,6 +42,7 @@ function createTaskCard(task) {
   //Deleting the task card upon the click of the delete button
   cardDeleteBtn.on("click", handleDeleteTask);
 
+  //
   if (task.dueDate && task.status !== "done") {
     const now = dayjs();
     const taskDueDate = dayjs(task.dueDate, "DD/MM/YYYY");
@@ -69,19 +70,15 @@ function renderTaskList() {
     //Putting the objects of the task list into an array [todo, inprogress, donelist]
     taskList = [];
   }
-
   //Declaring that the "todoList" will be whichever "taskCards" are in the "todoList"
   const todoList = $("#todo-cards");
   todoList.empty();
-
   //Declaring that the "tinProgressList" will be whichever "taskCards" are in the "inProgressList"
   const inProgressList = $("#in-progress-cards");
   inProgressList.empty();
-
   //Declaring that the "doneList" will be whichever "taskCards" are in the "doneList"
   const doneList = $("#done-cards");
   doneList.empty();
-
   //this is declaring where to append each of the task cards depending on where each card has been dragged/dropped
   for (let task of taskList) {
     if (task.status === "to-do") {
@@ -136,6 +133,7 @@ function handleDeleteTask(event) {
 
   const taskId = $(this).attr("data-task-id");
 
+  //putting the tasklist into an arrary in local storage
   taskList = taskList.filter((task) => task.id !== parseInt(taskId));
   localStorage.setItem("tasks", JSON.stringify(taskList));
   renderTaskList();
@@ -157,11 +155,14 @@ function handleDrop(event, ui) {
   renderTaskList();
 }
 
+
 $(document).ready(function () {
   renderTaskList();
 
+  //add take on "AddTask" click
   $("#taskForm").on("submit", handleAddTask);
 
+  //
   $(".lane").droppable({
     accept: ".draggable",
     drop: handleDrop,
